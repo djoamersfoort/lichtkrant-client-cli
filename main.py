@@ -12,7 +12,6 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("dev", nargs="?", help="Enable developer mode")
 args = parser.parse_args()
-multiplayer = False
 
 if "dev" not in args or not args.dev == "true":
     print(f"{Fore.GREEN}Updating game index...")
