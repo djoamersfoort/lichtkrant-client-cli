@@ -12,6 +12,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("dev", nargs="?", help="Enable developer mode")
 args = parser.parse_args()
+multiplayer = False
 
 if "dev" not in args or not args.dev == "true":
     print(f"{Fore.GREEN}Updating game index...")
@@ -31,7 +32,7 @@ else:
     print(f"{Fore.RED}No game index found! Exiting")
     exit(1)
 
-settings = {"ip": "100.64.0.65", "color": "#32a883"}
+settings = {"ip": "100.64.0.65", "color": "#32a883", "multiplayer": False}
 if exists("settings.json"):
     with open("settings.json") as f:
         settings = json.load(f)
@@ -47,6 +48,16 @@ class Page:
     def options(self):
         return []
 
+    @staticmethod
+    def formatItem(item):
+        if item["type"] == "toggle":
+            if settings[item["var"]]:
+                return f"{item['name']} [x]", item['name']
+            else:
+                return f"{item['name']} [ ]", item['name']
+
+        return item['name']
+
     def open(self):
         options = self.options()
 
@@ -54,7 +65,7 @@ class Page:
             inquirer.List(
                 "option",
                 message=self.name,
-                choices=list(map(lambda x: x["name"], options)),
+                choices=list(map(self.formatItem, options)),
             )
         ])
         if answers is None:
@@ -82,6 +93,12 @@ class Page:
                 elif option["type"] == "game":
                     print(f"{Fore.GREEN}Now playing {option['name']}!")
                     Game(option["game"])
+                elif option["type"] == "toggle":
+                    if settings[option["var"]]:
+                        settings[option["var"]] = False
+                    else:
+                        settings[option["var"]] = True
+                    self.open()
 
 
 class MainPage(Page):
@@ -97,7 +114,13 @@ class MainPage(Page):
 
     def options(self):
         return \
-            list(map(self.format, games)) + [
+            [
+                {
+                    "name": "Local multiplayer",
+                    "type": "toggle",
+                    "var": "multiplayer"
+                }
+            ] + list(map(self.format, games)) + [
                 {
                     "name": "Settings",
                     "type": "page",
