@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("dev", nargs="?", help="Enable developer mode")
 args = parser.parse_args()
 
-if not "dev" in args or not args.dev == "true":
+if "dev" not in args or not args.dev == "true":
     print(f"{Fore.GREEN}Updating game index...")
     try:
         url = "https://raw.githubusercontent.com/djoamersfoort/lichtkrant-client/main/games.json"
@@ -40,7 +40,8 @@ if exists("settings.json"):
 class Page:
     name = None
 
-    def cancel(self):
+    @staticmethod
+    def cancel():
         exit(0)
 
     def options(self):
@@ -71,8 +72,8 @@ class Page:
                     ])
 
                     settings[option["storage"]] = value["value"]
-                    with open("settings.json", "w") as f:
-                        json.dump(settings, f)
+                    with open("settings.json", "w") as fw:
+                        json.dump(settings, fw)
 
                     print(f"{Fore.GREEN}{option['name']} set to {value['value']}")
                     self.open()
